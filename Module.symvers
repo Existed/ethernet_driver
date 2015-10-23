@@ -1,0 +1,3 @@
+0x00000000	mdio_reg_write	/home/leon/10.2/build/../linux/drivers/ethernet/athrs_gmac	EXPORT_SYMBOL
+0x00000000	mdio_reg_read	/home/leon/10.2/build/../linux/drivers/ethernet/athrs_gmac	EXPORT_SYMBOL
+0x00000000	mdio_boot_init	/home/leon/10.2/build/../linux/drivers/ethernet/athrs_gmac	EXPORT_SYMBOL
