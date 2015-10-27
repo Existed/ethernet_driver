@@ -1,6 +1,0 @@
-config EXAMPLE
-	tristate "Just a example"
-	default n
-	help
-		This is a example, for debugging kernel model.	
-		If unsure, say N.

@@ -1,0 +1,5 @@
+config QCA-ETHERNET 
+	tristate "Ethernet Driver for QXA9531"
+	default m
+	help
+		Ethernet Driver for QXA9531
