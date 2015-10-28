@@ -21,6 +21,8 @@
 #include "athrs_mac.h"
 #include "athrs_phy.h"
 
+#include "qca953x_mac.h"
+
 
 /*
  * Function definitions. 

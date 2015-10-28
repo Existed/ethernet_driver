@@ -17,7 +17,8 @@
 #ifndef _QCA_953X_H
 #define _QCA_953X_H
 
-#include "atheros.h"
+#include "asm/mach-atheros/atheros.h"
+#include "config.h"
 
 #if defined(ATH_GE1_IS_CONNECTED)
     #define ATHR_GMAC_NMACS            2

@@ -50,6 +50,10 @@
 #include "athr_pb.h"
 #include "athrs_hw_accels.h"
 
+
+#include "qca953x_mac.h"
+#define CONFIG_MACH_QCA953x CONFIG_SOC_QCA953x
+
 #ifdef HYBRID_PLC_FILTER
 #include "athrs_plc_filter.h"
 #endif

@@ -19,7 +19,7 @@
 #include <linux/types.h>
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
-#include <linux/config.h>
+// #include <linux/config.h>
 #include <linux/delay.h>
 #include "athrs_ioctl.h"
 #include "athrs_config.h"
