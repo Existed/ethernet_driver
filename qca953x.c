@@ -25,7 +25,7 @@
 #define athr_gmac_force_check_link()					\
         athr_gmac_check_link(mac, 0);
 #else
-#define athr_swap_phy() /* do nothing */
+#define athr_swap_phy() { printk("##### athr_swap_phy() do nothing ...\n"); }/* do nothing */
 #define athr_gmac_force_check_link()					\
         athr_gmac_check_link(mac, 4);
 #endif
@@ -201,6 +201,8 @@ void qca953x_soc_gmac_set_link(void *arg, athr_phy_speed_t speed, int fdx)
     athr_gmac_ops_t *ops = mac->ops;
     int fifo_3 = 0x1f00140;
 
+    printk("##### qca953x_soc_gmac_set_link() ...\n");
+
     if (mac_has_flag(mac,ETH_FORCE_SPEED)) {
         speed = mac->forced_speed;
         fdx   = 1;
@@ -307,6 +309,12 @@ void qca953x_soc_gmac_set_link(void *arg, athr_phy_speed_t speed, int fdx)
     DPRINTF(MODULE_NAME ": cfg_4: %#x\n", athr_gmac_reg_rd(mac, ATHR_GMAC_FIFO_CFG_4));
     DPRINTF(MODULE_NAME ": cfg_5: %#x\n", athr_gmac_reg_rd(mac, ATHR_GMAC_FIFO_CFG_5));
 
+    printk("##### qca953x_soc_gmac_set_link(), " MODULE_NAME ": cfg_1: %#x\n", athr_gmac_reg_rd(mac, ATHR_GMAC_FIFO_CFG_1));
+    printk("##### qca953x_soc_gmac_set_link(), " MODULE_NAME ": cfg_2: %#x\n", athr_gmac_reg_rd(mac, ATHR_GMAC_FIFO_CFG_2));
+    printk("##### qca953x_soc_gmac_set_link(), " MODULE_NAME ": cfg_3: %#x\n", athr_gmac_reg_rd(mac, ATHR_GMAC_FIFO_CFG_3));
+    printk("##### qca953x_soc_gmac_set_link(), " MODULE_NAME ": cfg_4: %#x\n", athr_gmac_reg_rd(mac, ATHR_GMAC_FIFO_CFG_4));
+    printk("##### qca953x_soc_gmac_set_link(), " MODULE_NAME ": cfg_5: %#x\n", athr_gmac_reg_rd(mac, ATHR_GMAC_FIFO_CFG_5));
+
 
 } 
 
@@ -327,6 +335,8 @@ static int inline athr_get_portno(int phyUnit)
 
 int qca953x_gmac_check_link(void *arg, int phyUnit)
 {
+    printk("##### qca953x_gmac_check_link(), starting ... \n");
+
      athr_phy_speed_t   speed;
     athr_gmac_t        *mac = (athr_gmac_t *) arg;
     struct net_device  *dev = mac->mac_dev;
@@ -337,6 +347,8 @@ int qca953x_gmac_check_link(void *arg, int phyUnit)
 
     assert(mac);
     assert(phy);
+
+    printk("##### qca953x_gmac_check_link(), pass assert() ... \n");
 
     rc = athr_gmac_get_link_st(mac, &phy_up, &fdx, &speed, phyUnit);
     
@@ -463,6 +475,7 @@ int qca953x_gmac_check_link(void *arg, int phyUnit)
     }
 
 done:
+    printk("##### qca953x_gmac_check_link(), returning ... \n");
     return 0;
 }
 
@@ -512,6 +525,8 @@ int qca953x_gmac_mii_setup(void *arg)
                 athr_gmac_reg_rmw_set(athr_gmacs[0], ATHR_GMAC_CFG1, ATHR_GMAC_CFG1_SOFT_RST);;
             }
 #ifdef CFG_ATHRS27_APB_ACCESS
+
+            printk("##### qca953x_gmac_mii_setup() CFG_ATHRS27_APB_ACCESS is defined ...\n")
           athr_reg_rmw_set(ATHR_GMAC_ETH_CFG, (ATHR_GMAC_ETH_CFG_SW_APB_ACCESS | ATHR_GMAC_ETH_CFG_SW_ACC_MSB_FIRST));
 #endif 
         }
@@ -539,7 +554,7 @@ int qca953x_gmac_hw_setup(void *arg)
        return -1;
     } 
 
-
+    printk("##### qca953x_gmac_hw_setup(), mac->mac_unit = %d ... \n", mac->mac_unit);
 
     /* clear the rx fifo state if any */
     athr_gmac_reg_wr(mac, ATHR_GMAC_DMA_RX_STATUS,

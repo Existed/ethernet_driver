@@ -734,6 +734,7 @@ athr_gmac_attach(athr_gmac_t *mac)
   return (qca955x_gmac_attach(mac));
 #endif
 #if  defined(CONFIG_MACH_QCA953x)
+  printk("##### athr_gmac_attach(), calling qca953x_gmac_attach() ...\n");
   return (qca953x_gmac_attach(mac));
 #endif
 #if defined(CONFIG_MACH_QCA956x)

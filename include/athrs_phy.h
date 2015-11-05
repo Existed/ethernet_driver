@@ -131,14 +131,14 @@
 #define is_s26() 1
 #endif
 
-#ifdef CONFIG_ATHRS27_PHY
+// #ifdef CONFIG_ATHRS27_PHY
 #include "athrs27_phy.h"
 #undef is_s27 
 #ifdef CONFIG_ATHR_SUPPORT_DUAL_PHY
-#define is_s27()(mac->mac_unit == 1)
+#define is_s27() (mac->mac_unit == 1)
 #else
-#define is_s27()(1)
-#endif
+#define is_s27() (1)
+// #endif
 #endif
 
 #ifdef CONFIG_ATHRF1_PHY
@@ -253,7 +253,7 @@ typedef struct {
 static inline int
 athr_gmac_phy_attach(void *arg,int unit)
 {
-#if defined(CONFIG_AR7240_S26_PHY) || defined(CONFIG_ATHRS26_PHY)
+/*#if defined(CONFIG_AR7240_S26_PHY) || defined(CONFIG_ATHRS26_PHY)
    if (is_ar7240() || is_ar7241() || (is_ar7242() && unit == 1) || is_ar7100() || is_ar933x() || (is_qca956x() && unit==1)) {
       athrs26_register_ops(arg);
    }
@@ -289,13 +289,15 @@ athr_gmac_phy_attach(void *arg,int unit)
 #ifdef CONFIG_ATHRS27_PHY
 #ifdef CONFIG_ATHR_SUPPORT_DUAL_PHY
    if ((is_ar934x() || is_qca953x()) && unit) {
+// #else
+   // if (is_ar934x() || is_qca953x() || is_qca956x()) 
 #else
-   if (is_ar934x() || is_qca953x() || is_qca956x()) {
-#endif
+    {
+#endif*/
       printk("mac:%d Registering S27....\n",unit);
       athrs27_register_ops(arg);
-   }
-#endif
+   // }
+// #endif
 #ifdef CONFIG_ATHRF1_PHY
    if((is_ar934x() || is_qca953x()) && (unit == 0)){
       printk("mac%d registering f1e .....\n",unit);

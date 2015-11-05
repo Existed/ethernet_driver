@@ -14,6 +14,8 @@ __attribute__((section(".gnu.linkonce.this_module"))) = {
  .arch = MODULE_ARCH_INIT,
 };
 
+MODULE_INFO(intree, "Y");
+
 static const char __module_depends[]
 __used
 __attribute__((section(".modinfo"))) =

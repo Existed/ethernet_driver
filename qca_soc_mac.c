@@ -43,6 +43,7 @@
 #include "athrs_trc.h"
 #include "athrs_mac_def.h"
 #include "athrs_flowmac.h"
+#include "athrs_phy.h"  // add for is_s27() 2015-10-31 15:23
 
 #ifndef CONFIG_MACH_QCA956x
 #define MODULE_NAME "qca955x_GMAC"
@@ -257,6 +258,7 @@ athr_gmac_open(struct net_device *dev)
     phy->setup(mac);
     phy_in_reset = 0;
 
+    printk("##### Setup PHY completed ...\n");
 
     if ((mac->mii_intf == ATHR_SGMII) && !mac_has_flag(mac, ATHR_SGMII_FORCED)) {
         athr_reg_wr(MR_AN_CONTROL_ADDRESS, MR_AN_CONTROL_AN_ENABLE_SET(1));
@@ -294,6 +296,9 @@ athr_gmac_open(struct net_device *dev)
 
     if (mac_has_flag(mac, ETH_LINK_INTERRUPT)) {
         if ( is_s27()) {
+
+            printk("##### athr_gmac_open(), s27 requesting irq ...\n");
+
             st = request_irq(ATHR_IRQ_ENET_LINK, athr_gmac_link_intr, 
                     IRQF_SHARED, "gmac s27 link intr", mac);
 #ifdef CONFIG_ATH_S17INT_GPIO
@@ -353,9 +358,11 @@ athr_gmac_open(struct net_device *dev)
      */
     if(phy->reg_config)
     {
-        if(is_s27()) { 
+        if(is_s27()) {
+
+            printk("##### athr_gmac_open(), calling reg_config() ..."); 
             phy->reg_config(ATHR_GMAC_PORT_ON, ENET_UNIT_LAN); /* LAN ports */
-	    phy->reg_config(ATHR_GMAC_PORT_ON, ENET_UNIT_WAN); /* WAN port */ 
+            phy->reg_config(ATHR_GMAC_PORT_ON, ENET_UNIT_WAN); /* WAN port */ 
         } else { 
 	    if ((mac_has_flag(mac,ATHR_S17_MAC0_SGMII))) {
 	            phy->reg_config(ATHR_GMAC_PORT_ON, ((mac->mac_unit == 0) ? ENET_UNIT_WAN : ENET_UNIT_LAN));
@@ -364,16 +371,23 @@ athr_gmac_open(struct net_device *dev)
 	        }
 	}  
     }
+
+    printk("##### athr_gmac_open() returning success status...\n");
     return 0;
 
 rx_failed:
+    printk("##### athr_gmac_open() rx_failed ...\n");
     athr_gmac_tx_free(mac);
 tx_failed:
+    printk("##### athr_gmac_open() tx_failed ...\n");
     free_irq(mac->mac_irq, dev);
 #if CONFIG_GMAC_RXTIMER
     free_irq((mac->mac_unit == 0)?
         ATHR_IRQ_GE0_GLOBAL_TIMER:ATHR_IRQ_GE1_GLOBAL_TIMER, dev);
 #endif
+    
+    printk("##### athr_gmac_open() returning fialed status...\n");
+
     return 1;
 }
 
@@ -1485,6 +1499,8 @@ athr_gmac_tx_alloc(athr_gmac_t *mac)
 
     for(ac = 0;ac < mac->mac_noacs; ac++) {
 
+        printk("##### athr_gmac_tx_alloc() calling athr_gmac_ring_alloc() ...\n");
+
        r  = &mac->mac_txring[ac];
        if (athr_gmac_ring_alloc(mac, r, mac->num_tx_desc, flag))
            return 1;
@@ -1511,6 +1527,8 @@ athr_gmac_rx_alloc(athr_gmac_t *mac)
     int i, next, tail = r->ring_tail;
     athr_gmac_buffer_t *bf;
     athr_desc_type flag = ATHR_RX;
+
+    printk("##### athr_gmac_rx_alloc() calling athr_gmac_ring_alloc() ...\n");
 
     if (athr_gmac_ring_alloc(mac, r, mac->num_rx_desc, flag))
         return 1;
@@ -1823,6 +1841,7 @@ athr_gmac_init(void)
     athr_gmac_t      *mac;
     uint32_t mask = 0;
 
+    printk("########  athr_gmac_init() ...\n");
 
     /*
     * tx_len_per_ds is the number of bytes per data transfer in word increments.
@@ -1912,7 +1931,9 @@ athr_gmac_init(void)
                 continue;
         }
 
+        printk("##### calling athr_gmac_phy_attach() ...\n");
         athr_gmac_phy_attach(mac, mac->mac_unit);
+        printk("##### athr_gmac_phy_attach() returned ...\n");
 
 
         spin_lock_init(&mac->mac_lock);
@@ -2058,6 +2079,8 @@ athr_gmac_init(void)
                                          (void *)&mac->push_dur);
     }
 
+    printk("##### ahr_gmac_init() returning success ...\n");
+
    return 0;
 
 failed:
@@ -2074,6 +2097,9 @@ failed:
         }
 
     }
+
+    printk("##### ahr_gmac_init() returning failed ...\n");
+
     return 1;
 }
 

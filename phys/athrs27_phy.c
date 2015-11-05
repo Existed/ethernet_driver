@@ -280,6 +280,8 @@ int athrs27_reg_init(void *arg)
     uint32_t rd_data;
     athr_gmac_t *mac = (athr_gmac_t *)arg;
 
+    printk("###### athrs27_reg_init() ...\n");
+
     /* if using header for register configuration, we have to     */
     /* configure s27 register after frame transmission is enabled */
     if (athr27_init_flag)
@@ -320,10 +322,17 @@ int athrs27_reg_init(void *arg)
 
     athr27_init_flag = 1;
 
-    DPRINTF(MODULE_NAME":OPERATIONAL_MODE_REG0:%x\n",athrs27_reg_read(S27_OPMODE_REG0));
+/*    DPRINTF(MODULE_NAME":OPERATIONAL_MODE_REG0:%x\n",athrs27_reg_read(S27_OPMODE_REG0));
     DPRINTF(MODULE_NAME":REG 0x4-->:%x\n",athrs27_reg_read(0x4));
     DPRINTF(MODULE_NAME":REG 0x2c-->:%x\n",athrs27_reg_read(0x2c));
-    DPRINTF(MODULE_NAME":REG 0x8-->:%x\n",athrs27_reg_read(0x8));
+    DPRINTF(MODULE_NAME":REG 0x8-->:%x\n",athrs27_reg_read(0x8));*/
+
+
+    printk(MODULE_NAME":OPERATIONAL_MODE_REG0:%x\n",athrs27_reg_read(S27_OPMODE_REG0));
+    printk(MODULE_NAME":REG 0x4-->:%x\n",athrs27_reg_read(0x4));
+    printk(MODULE_NAME":REG 0x2c-->:%x\n",athrs27_reg_read(0x2c));
+    printk(MODULE_NAME":REG 0x8-->:%x\n",athrs27_reg_read(0x8));
+    printk("###### athrs27_reg_init()  returning...\n");
 
     return 0;
 }
@@ -342,6 +351,8 @@ int athrs27_reg_init_lan(void *arg)
     uint32_t  queue_ctrl_reg = 0;
     uint32_t rd_data;
     athr_gmac_t *mac = (athr_gmac_t *)arg;
+
+    printk("###### athrs27_reg_init_lan() ...\n");
 
     /* if using header for register configuration, we have to     */
     /* configure s27 register after frame transmission is enabled */
@@ -371,6 +382,8 @@ int athrs27_reg_init_lan(void *arg)
                      (athrs27_reg_read(S27_PORT_STATUS_REGISTER0) | 0x30));
   
     DPRINTF("Port status register read 2:%X\n",athrs27_reg_read(0x100));
+
+    printk("###### athrs27_reg_init_lan(), Port status register read 2:%X\n",athrs27_reg_read(0x100));
 
        
     athrs27_reg_rmw(S27_OPMODE_REG0, S27_MAC0_MAC_GMII_EN);  /* Set GMII mode */
@@ -756,10 +769,13 @@ athrs27_phy_setup(void *arg)
     athr_gmac_t *mac = (athr_gmac_t *)arg;
     int ethUnit = mac->mac_unit;
 
+    printk("##### athrs27_phy_setup() start ...\n");
 
     /* See if there's any configuration data for this enet */
     /* start auto negogiation on each phy */
     for (phyUnit=0; phyUnit < S27_PHY_MAX; phyUnit++) {
+
+        printk("##### athrs27_phy_setup() , PHY Unit: %d ...\n", phyUnit);
 
         foundPhy = TRUE;
         phyBase = S27_PHYBASE(phyUnit);
@@ -799,9 +815,13 @@ athrs27_phy_setup(void *arg)
           s27_rd_phy(1,phyAddr,S27_PHY_SPEC_STATUS));
     }
 
+    printk("##### athrs27_phy_setup() , PHY Unit setup complete ...\n");
+
     if (!foundPhy) {
         return FALSE; /* No PHY's configured for this ethUnit */
     }
+
+    printk("##### athrs27_phy_setup(), foundPhy: %d ...\n", foundPhy);
 
     /*
      * After the phy is reset, it takes a little while before
@@ -845,6 +865,7 @@ athrs27_phy_setup(void *arg)
             if (S27_RESET_DONE(phyHwStatus)) {
                 DRV_PRINT(DRV_DEBUG_PHYSETUP,
                           ("Port %d, Neg Success\n", phyUnit));
+            printk("Port %d, Neg Success\n", phyUnit);
                 break;
             }
             if (timeout == 0) {
@@ -916,6 +937,10 @@ athrs27_phy_setup(void *arg)
             ("eth%d: Phy Specific Status=%4.4x\n",
             ethUnit, 
             s27_rd_phy(1,S27_PHYADDR(phyUnit),S27_PHY_SPEC_STATUS)));
+
+        printk("eth%d: Phy Specific Status=%4.4x\n",
+            ethUnit, 
+            s27_rd_phy(1,S27_PHYADDR(phyUnit),S27_PHY_SPEC_STATUS));
        
     }
 #ifdef S27_8023AZ_FEATURE
@@ -955,6 +980,8 @@ athrs27_phy_setup(void *arg)
     if (mac_has_flag(mac, ETH_SOFT_LED)) {
         athrs27_reg_write(0x80, 1 << 30);
     }
+
+    printk("##### athrs27_phy_setup() , returning ...\n");
 
     return (liveLinks > 0);
 }
@@ -1115,11 +1142,15 @@ athrs27_phy_is_up(int ethUnit)
     int           phyUnit;
     athr_gmac_t   *mac = athr_macs[ethUnit];
 
+    printk("##### athrs27_phy_is_up() starting ...\n");
+
     for (phyUnit=0; phyUnit < S27_PHY_MAX; phyUnit++) {
         if (!S27_IS_ETHUNIT(phyUnit, ethUnit) &&
             !mac_has_flag(mac,ETH_SWONLY_MODE)) {
             continue;
         }
+
+        printk("##### athrs27_phy_is_up() phyUnit = %d ...\n", phyUnit);
 
         phyBase = S27_PHYBASE(phyUnit);
         phyAddr = S27_PHYADDR(phyUnit);
@@ -1170,6 +1201,8 @@ athrs27_phy_is_up(int ethUnit)
                  || S27_AUTONEG_DONE(phyHwStatus)) {
                 phyHwStatus = s27_rd_phy(1, phyAddr, 
                                            S27_PHY_SPEC_STATUS);
+
+                printk("##### athrs27_phy_is_up() phyHwStatus = %d ...\n", phyHwStatus);
 
                 if (phyHwStatus & S27_STATUS_LINK_PASS) {
                 gainedLinks++;
@@ -1362,6 +1395,7 @@ void ar7240_s27_intr(void *arg)
     athr_gmac_t *mac0 = athr_macs[0];
     athr_gmac_t *mac1 = athr_macs[1];
 
+    printk("##### ar7240_s27_intr() starting ...\n");
 
     athrs27_reg_write(S27_GLOBAL_INTR_MASK_REG,0x0);
 
@@ -1381,19 +1415,23 @@ void ar7240_s27_intr(void *arg)
 
            if(status & S27_LINK_UP) {
                DPRINTF("LINK UP - Port %d:%x\n",phyAddr,status);
+               printk("##### ar7240_s27_intr(), LINK UP - Port %d:%x\n",phyAddr,status);
                phymask = (phymask | (1 << phyUnit));
            }
            if(status & S27_LINK_DOWN) {
                DPRINTF("LINK DOWN - Port %d:%x\n",phyAddr,status);
+               printk("##### ar7240_s27_intr(), LINK DOWN - Port %d:%x\n",phyAddr,status);
                phymask = (phymask | (1 << phyUnit));
                linkDown = (linkDown | (1 << phyUnit));
            }
            if(status & S27_LINK_DUPLEX_CHANGE) {
                DPRINTF("LINK DUPLEX CHANGE - Port %d:%x\n",phyAddr,status);
+               printk("##### ar7240_s27_intr(), LINK DUPLEX CHANGE - Port %d:%x\n",phyAddr,status);
                phymask = (phymask | (1 << phyUnit));
            }
            if(status & S27_LINK_SPEED_CHANGE) {
                DPRINTF("LINK SPEED CHANGE %d:%x\n",phyAddr,status);
+               printk("##### ar7240_s27_intr(), LINK SPEED CHANGE %d:%x\n",phyAddr,status);
                phymask = (phymask | (1 << phyUnit));
            }
        }
@@ -1425,6 +1463,7 @@ void ar7240_s27_intr(void *arg)
    }
    else  {
       DPRINTF("Spurious link interrupt:%s,status:%x\n",__func__,status);
+      printk("##### ar7240_s27_intr(), Spurious link interrupt:%s,status:%x\n",__func__,status);
       athrs27_reg_write(S27_GLOBAL_INTR_MASK_REG,S27_LINK_CHANGE_REG);
    }
 
