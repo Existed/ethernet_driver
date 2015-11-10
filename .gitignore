@@ -32,3 +32,4 @@
 *.dSYM/
 
 modules.order
+modules.builtin
