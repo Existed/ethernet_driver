@@ -45,6 +45,11 @@
 #include "athrs_flowmac.h"
 #include "athrs_phy.h"  // add for is_s27() 2015-10-31 15:23
 
+ #ifdef CONFIG_OF
+#include <linux/of.h>
+#include <linux/of_platform.h>
+#endif
+
 #ifndef CONFIG_MACH_QCA956x
 #define MODULE_NAME "qca955x_GMAC"
 #else
@@ -1833,8 +1838,9 @@ athr_gmac_vet_tx_len_per_pkt(unsigned int *len)
 /*
  * All allocations (except irq and rings).
  */
-static int __init
-athr_gmac_init(void)
+static int 
+// athr_gmac_init(void)
+ag71xx_probe(void)
 {
     int i;
     struct net_device *dev;
@@ -2103,6 +2109,52 @@ failed:
     return 1;
 }
 
+static int __devexit ag71xx_remove(struct platform_device *pdev)
+{
+    struct net_device *dev = platform_get_drvdata(pdev);
+
+    if (dev) {
+        athr_gmac_t *ag = netdev_priv(dev);
+
+        // ag71xx_debugfs_exit(ag);
+        // ag71xx_phy_disconnect(ag);
+        unregister_netdev(dev);
+        free_irq(dev->irq, dev);
+        iounmap(ag->mac_base);
+        kfree(dev);
+        platform_set_drvdata(pdev, NULL);
+    }
+
+    return 0;
+}
+
+#ifdef CONFIG_OF
+static const struct of_device_id ag71xx_of_match_table[] = {
+    {.compatible = "qcom,ag71xx-eth"},
+    {}
+};
+#else
+#define ag71xx_of_match_table NULL
+#endif
+
+#ifndef AG71XX_DRV_NAME
+#define AG71XX_DRV_NAME "ag71xx"
+#endif
+
+static struct platform_driver ag71xx_driver = {
+    .probe      = ag71xx_probe,
+    .remove     = __exit_p(ag71xx_remove),
+    .driver = {
+        .name   = AG71XX_DRV_NAME,
+        .of_match_table = ag71xx_of_match_table,
+    }
+};
+
+static int __init athr_gmac_init(void)
+{
+    return platform_driver_register(&ag71xx_driver);
+}
+
 static void __exit
 athr_gmac_cleanup(void)
 {
@@ -2132,8 +2184,14 @@ athr_gmac_cleanup(void)
      }
 
 
+     platform_driver_unregister(&ag71xx_driver);
+
     printk(MODULE_NAME ": cleanup done\n");
 }
+
+
+
+
 
 module_init(athr_gmac_init);
 module_exit(athr_gmac_cleanup);
